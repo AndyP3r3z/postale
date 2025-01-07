@@ -42,7 +42,7 @@ class Mail:
 	def __str__(self) -> str:
 		recipients = self.get_recipients() or []
 		body: str = self.get_body() or "(no body)"
-		subject: str self.get_subject() or "(no subject)"
+		subject: str = self.get_subject() or "(no subject)"
 		rstr = f"""	\033[1m{subject}\033[0m
 	From: \033[4m{self.get_sender()}\033[0m
 	To:   \033[4m{'\033[0m, \033[4m'.join(recipients)}\033[0m
