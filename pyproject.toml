@@ -8,5 +8,7 @@ version = "1.2"
 requires-python = ">=3.10"
 authors = [{name = "Andres Pérez", email = "andy.perez.amado@gmail.com"}]
 description = "Simple wrapper around `smtplib` and `email` libraries."
-urls = {Homepage = "https://github.com/AndyP3r3z"}
+[project.urls]
+Homepage = "https://github.com/AndyP3r3z/postale"
+Issues = "https://github.com/AndyP3r3z/postale"
 
