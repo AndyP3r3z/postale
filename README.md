@@ -46,7 +46,7 @@ my_mail = Mail(
 )
 ```
 
-The following table shows the properties that class `Mail` have.
+The following table shows the properties that class `Mail` has.
 
 Property      | Type                   | Optional | Default
 ------------- | ---------------------- | -------- | -------
