@@ -41,12 +41,13 @@ class Mail:
 
 	def __str__(self) -> str:
 		recipients = self.get_recipients() or []
-		rstr = f"""
-	\033[1m{self.get_subject()}\033[0m
+		body: str = self.get_body() or "(no body)"
+		subject: str self.get_subject() or "(no subject)"
+		rstr = f"""	\033[1m{subject}\033[0m
 	From: \033[4m{self.get_sender()}\033[0m
 	To:   \033[4m{'\033[0m, \033[4m'.join(recipients)}\033[0m
 
-	{self.get_body()}
+	{body}
 
 	{' '.join([f'\033[4;7;34m{a}\033[0m' for a in self.attachments])}"""
 		return rstr
@@ -131,10 +132,10 @@ class Mail:
 			self.attach_single(file, name)
 		return
 
-	def send(self, password) -> None:
+	def send(self, password) -> bool:
 		server.login(self.sender, password)
 		self.server.sendmail(self.sender, self.recipients, self.mail.as_string())
-		return
+		return True
 
 	def save(self, path: str) -> None:
 		with open(path, "w") as f:
