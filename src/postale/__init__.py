@@ -17,10 +17,10 @@ class Mail:
 	def __init__(
 			self,
 			host: str, port: int = 587,
-			sender: str = None, recipients: str|list|tuple = None,
-			subject: str = None,
-			body: str = None,
-			attachments: str|dict = None,
+			sender: str|None = None, recipients: str|list|tuple|None = None,
+			subject: str|None = None,
+			body: str|None = None,
+			attachments: str|dict|None = None,
 		):
 		"""
 		Starts an SMTP server.
@@ -59,7 +59,7 @@ class Mail:
 			self.mail['Subject'] = item
 		return
 	def get_subject(self) -> str:
-		if "Subject" not in self.mail: return None
+		if "Subject" not in self.mail: return ''
 		return self.mail["Subject"]
 	subject = property(fset=set_subject, fget=get_subject)
 	
@@ -69,7 +69,7 @@ class Mail:
 			payload = self.mail.get_payload()
 			if isinstance(payload, list):
 				for part in payload:
-					if not (part is text_part): continue
+					if not isinstance(part, MIMEText): continue
 					payload.remove(part)
 					break
 		self.mail.attach(MIMEText(item))
@@ -78,22 +78,22 @@ class Mail:
 	body = property(fset=set_body, fget=get_body)
 
 	def set_sender(self, item: str) -> None: self.mail["From"] = item
-	def get_sender(self) -> str:
+	def get_sender(self) -> str|None:
 		if "From" not in self.mail: return None
 		return self.mail["From"]
 	sender = property(fset=set_sender, fget=get_sender)
 
-	def set_recipients(self, item: str|list[str]|tuple[str]) -> None:
+	def set_recipients(self, item: str|list[str]|tuple[str, ...]) -> None:
 		if isinstance(item, str):
 			self.mail['To'] = item
 			return
 		self.mail['To'] = ', '.join(item)
-	def get_recipients(self) -> str|tuple[str]:
+	def get_recipients(self) -> str|tuple[str, ...]|None:
 		if "To" not in self.mail: return None
 		return tuple(r.strip() for r in self.mail['To'].split(","))
 	recipients = property(fset=set_recipients, fget=get_recipients)
 
-	def attach_single(self, file: str|bytes, filename: str = None) -> None:
+	def attach_single(self, file: str|bytes, filename: str|None = None) -> None:
 		"""
 		Attaches a `file` with `filename`.
 
@@ -118,7 +118,7 @@ class Mail:
 		))
 		return
 
-	def attach(self, files: str|bytes|dict[str, str|bytes], filename: str = None) -> None:
+	def attach(self, files: str|bytes|dict[str, str|bytes], filename: str|None = None) -> None:
 		if isinstance(files, bytes) and not filename:
 			raise TypeError('`filename` is required when a `bytes` object is given.')
 		if isinstance(files, str) and not filename:
@@ -133,7 +133,7 @@ class Mail:
 		return
 
 	def send(self, password) -> bool:
-		server.login(self.sender, password)
+		self.server.login(self.sender, password)
 		self.server.sendmail(self.sender, self.recipients, self.mail.as_string())
 		return True
 
