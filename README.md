@@ -13,15 +13,20 @@ pip install postale
 ### Import it
 
 You can either
+
 ```python
 import postale
 ```
+
 or
+
 ```python
-from postale import Mail
+from postale import Mail, Gmail
 ```
 
-As for now, `Mail` is the only class in this module.
+`Mail` is the most generic class in the module, `Gmail` inherits everything from it, but has specific arguments already set for the gmail client.
+
+> **Note:** The gmail SMTP provider needs you to set an App Password, different from your e-mail password.
 
 ### Create an e-mail
 
@@ -32,6 +37,11 @@ my_mail = Mail(
     'smtp.host.com',
     port = 25,
     # other kwargs...
+)
+
+# With Gmail class you don't need to specify the host nor the port:
+my_gmail = Mail(
+    # kwargs...
 )
 ```
 
@@ -48,15 +58,15 @@ my_mail = Mail(
 
 The following table shows the properties that class `Mail` has.
 
-Property      | Type                   | Optional | Default
-------------- | ---------------------- | -------- | -------
-`host`        | `str`                  | No       | -
-`port`        | `int`                  | Yes      | `587`
-`sender`      | `str`                  | Yes      | `None`
-`recipients`  | `str`, `list`, `tuple` | Yes      | `None`
-`subject`     | `str`                  | Yes      | `None`
-`body`        | `str`                  | Yes      | `None`
-`attachments` | `str`, `dict`, `bytes` | Yes      | `None`
+Property      | Type                   | Optional | Default | In `Gmail` |
+------------- | ---------------------- | -------- | ------- | ---------- |
+`host`        | `str`                  | No       | -       | No         |
+`port`        | `int`                  | Yes      | `587`   | No         |
+`sender`      | `str`                  | Yes      | `None`  | Yes        |
+`recipients`  | `str`, `list`, `tuple` | Yes      | `None`  | Yes        |
+`subject`     | `str`                  | Yes      | `None`  | Yes        |
+`body`        | `str`                  | Yes      | `None`  | Yes        |
+`attachments` | `str`, `dict`, `bytes` | Yes      | `None`  | Yes        |
 
 ### Printing
 
@@ -92,4 +102,3 @@ It is necessary to have the sender's password to be able to send the e-mail. In 
 new_mail.send('supersecurepass1234.')
 ```
 
-> **Note:** Some SMTP providers (like gmail) need you to set an App Password, different from your e-mail password.

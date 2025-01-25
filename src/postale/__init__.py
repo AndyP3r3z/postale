@@ -12,8 +12,6 @@ from email.mime.application import MIMEApplication
 from os.path import split as pathsplit
 
 class Mail:
-	attachments: list = []
-	bodytext: str = ""
 	def __init__(
 			self,
 			host: str, port: int = 587,
@@ -29,8 +27,9 @@ class Mail:
 			host: SMTP host server.
 			port: SMPT port to use (default is 587).
 		"""
+		self.attachments: list = []
+		self.bodytext: str = ""
 		self.server: SMTP = SMTP(host, port)
-		self.server.starttls()
 		self.mail: MIMEMultipart = MIMEMultipart()
 		if sender: self.set_sender(sender)
 		if recipients: self.set_recipients(recipients)
@@ -133,13 +132,25 @@ class Mail:
 		return
 
 	def send(self, password) -> bool:
-		self.server.login(self.sender, password)
-		self.server.sendmail(self.sender, self.recipients, self.mail.as_string())
-		return True
+		try:
+			self.server.starttls()
+			self.server.login(self.sender, password)
+			self.server.sendmail(self.sender, self.recipients, self.mail.as_string())
+			self.server.quit()
+			return True
+		except Exception as e:
+			print(f"Failed to send email: {e}")
+			return False
 
 	def save(self, path: str) -> None:
 		with open(path, "w") as f:
 			f.write(self.mail.as_string())
+		return
+
+class Gmail(Mail):
+	def __init__(self, *args, **kwargs):
+		super().__init__('smtp.gmail.com', 587, *args, **kwargs)
+		return
 
 def main() -> None: return
 
