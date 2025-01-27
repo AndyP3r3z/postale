@@ -126,8 +126,8 @@ class Mail:
 			self.attach_single(files, filename)
 			return
 		for name, file in files.items():
-			if not (isinstance(name, str) and isinstance(files, str|bytes)):
-				raise TypeError("Items in the dictionary must be `str`: `str|bytes`.")
+			if not (isinstance(name, str) and isinstance(file, str|bytes)):
+				raise TypeError("Items in the dictionary must be in the form of `{str: str | bytes}`.")
 			self.attach_single(file, name)
 		return
 
