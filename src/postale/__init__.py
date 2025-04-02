@@ -18,8 +18,7 @@ class Mail:
 			sender: str|None = None, recipients: str|list|tuple|None = None,
 			subject: str|None = None,
 			body: str|None = None,
-			attachments: str|dict|None = None,
-		):
+			attachments: str|dict|None = None,):
 		"""
 		Starts an SMTP server.
 
@@ -31,38 +30,40 @@ class Mail:
 		self.bodytext: str = ""
 		self.server: SMTP = SMTP(host, port)
 		self.mail: MIMEMultipart = MIMEMultipart()
-		if sender: self.set_sender(sender)
-		if recipients: self.set_recipients(recipients)
-		if subject: self.set_subject(subject)
-		if body: self.set_body(body)
+		if sender: self.sender = sender
+		if recipients: self.recipients = recipients
+		if subject: self.subject = subject
+		if body: self.body = body
 		if attachments: self.attach(attachments)
 		return
 
 	def __str__(self) -> str:
-		recipients = self.get_recipients() or []
-		body: str = self.get_body() or "(no body)"
-		subject: str = self.get_subject() or "(no subject)"
+		recipients = self.recipients or []
+		body: str = self.body or "(no body)"
+		subject: str = self.subject or "(no subject)"
 		rstr = f"""	\033[1m{subject}\033[0m
-	From: \033[4m{self.get_sender()}\033[0m
+	From: \033[4m{self.sender}\033[0m
 	To:   \033[4m{'\033[0m, \033[4m'.join(recipients)}\033[0m
 
 	{body}
 
 	{' '.join([f'\033[4;7;34m{a}\033[0m' for a in self.attachments])}"""
 		return rstr
-
-	def set_subject(self, item: str) -> None:
+	@property
+	def subject(self) -> str:
+		if "Subject" not in self.mail: return ''
+		return self.mail["Subject"]
+	@subject.setter
+	def subject(self, item: str) -> None:
 		try:
 			self.mail.replace_header("Subject", item)
 		except KeyError:
 			self.mail['Subject'] = item
-		return
-	def get_subject(self) -> str:
-		if "Subject" not in self.mail: return ''
-		return self.mail["Subject"]
-	subject = property(fset=set_subject, fget=get_subject)
-	
-	def set_body(self, item: str) -> None:
+
+	@property
+	def body(self) -> str: return self.bodytext
+	@body.setter
+	def body(self, item: str) -> None:
 		if self.bodytext:
 			# Unattach
 			payload = self.mail.get_payload()
@@ -73,24 +74,24 @@ class Mail:
 					break
 		self.mail.attach(MIMEText(item))
 		self.bodytext = item
-	def get_body(self) -> str: return self.bodytext
-	body = property(fset=set_body, fget=get_body)
 
-	def set_sender(self, item: str) -> None: self.mail["From"] = item
-	def get_sender(self) -> str|None:
+	@property
+	def sender(self) -> str|None:
 		if "From" not in self.mail: return None
 		return self.mail["From"]
-	sender = property(fset=set_sender, fget=get_sender)
+	@sender.setter
+	def sender(self, item: str) -> None: self.mail["From"] = item
 
-	def set_recipients(self, item: str|list[str]|tuple[str, ...]) -> None:
+	@property
+	def recipients(self) -> str|tuple[str, ...]|None:
+		if "To" not in self.mail: return None
+		return tuple(r.strip() for r in self.mail['To'].split(","))
+	@recipients.setter
+	def recipients(self, item: str|list[str]|tuple[str, ...]) -> None:
 		if isinstance(item, str):
 			self.mail['To'] = item
 			return
 		self.mail['To'] = ', '.join(item)
-	def get_recipients(self) -> str|tuple[str, ...]|None:
-		if "To" not in self.mail: return None
-		return tuple(r.strip() for r in self.mail['To'].split(","))
-	recipients = property(fset=set_recipients, fget=get_recipients)
 
 	def attach_single(self, file: str|bytes, filename: str|None = None) -> None:
 		"""
@@ -134,6 +135,10 @@ class Mail:
 	def send(self, password) -> bool:
 		try:
 			self.server.starttls()
+			if self.sender is None:
+				raise ValueError("Sender is not set.")
+			if self.recipients is None:
+				raise ValueError("There is no recipient set.")
 			self.server.login(self.sender, password)
 			self.server.sendmail(self.sender, self.recipients, self.mail.as_string())
 			self.server.quit()
@@ -148,8 +153,12 @@ class Mail:
 		return
 
 class Gmail(Mail):
-	def __init__(self, *args, **kwargs):
-		super().__init__('smtp.gmail.com', 587, *args, **kwargs)
+	def __init__(self,
+			sender: str|None = None, recipients: str|list|tuple|None = None,
+			subject: str|None = None,
+			body: str|None = None,
+			attachments: str|dict|None = None,):
+		super().__init__('smtp.gmail.com', 587, sender, recipients, subject, body, attachments)
 		return
 
 def main() -> None: return
