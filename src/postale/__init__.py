@@ -38,13 +38,13 @@ class Mail:
 		return
 
 	def __str__(self) -> str:
-		recipients = self.recipients or []
+		recipients = '\033[0m, \033[4m'.join(self.recipients or [])
 		body: str = self.body or "(no body)"
 		subject: str = self.subject or "(no subject)"
 		attachments: str = ' '.join([f'\033[4;7;34m{a}\033[0m' for a in self.attachments])
 		rstr = f"""	\033[1m{subject}\033[0m
 	From: \033[4m{self.sender}\033[0m
-	To:   \033[4m{'\033[0m, \033[4m'.join(recipients)}\033[0m
+	To:   \033[4m{recipients}\033[0m
 
 	{body}
 

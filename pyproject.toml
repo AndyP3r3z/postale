@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "postale"
-version = "1.3.3"
+version = "1.3.4"
 requires-python = ">=3.10"
 authors = [{name = "Andres Pérez", email = "andy.perez.amado@gmail.com"}]
 description = "Simple wrapper around `smtplib` and `email` libraries."
